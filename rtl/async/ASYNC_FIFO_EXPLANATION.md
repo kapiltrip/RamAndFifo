@@ -282,6 +282,26 @@ This block gives you a robust contract:
 - At edge: intent is committed.
 - After edge: committed pointer state is stable for memory write indexing, full detection pipeline, and CDC export.
 
+### Difference between point 7 and point 8
+Point `7` and point `8` are two different phases of the same state machine step:
+
+- Point `7` (`Write-domain next pointer logic`) is **combinational decision logic**.
+  It answers: "Given current inputs (`wr_en`, `full`) and current state, what should the next pointer be?"
+  Output of point `7` is intent signals: `wr_ptr_bin_next`, `wr_ptr_gray_next`.
+
+- Point `8` (`Write-domain state registers`) is **sequential state storage**.
+  It answers: "At this `wr_clk` edge, what state is officially committed into flip-flops?"
+  Output of point `8` is committed architectural state: `wr_ptr_bin`, `wr_ptr_gray`.
+
+In short:
+- Point `7` computes.
+- Point `8` commits.
+
+Why this split is required:
+- Keeps arithmetic and handshake decisions in combinational logic.
+- Keeps state transitions edge-aligned and race-free in registers.
+- Prevents glitches from becoming architectural state.
+
 ---
 
 ## 9) Write operation into memory
