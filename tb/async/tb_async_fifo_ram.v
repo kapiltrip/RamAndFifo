@@ -8,7 +8,7 @@ module tb_async_fifo_ram;
 
     reg                 wr_clk;
     reg                 rd_clk;
-    reg                 rst;
+    reg                 rst_n;
     reg                 wr_en;
     reg                 rd_en;
     reg  [DW-1:0]       wr_data;
@@ -27,13 +27,14 @@ module tb_async_fifo_ram;
     integer             wr_start;
     integer             rd_start;
 
-    async_fifo_with_ram #(
+    async_fifo #(
         .DATA_WIDTH(DW),
         .ADDR_WIDTH(AW)
     ) dut (
-        .wclk(wr_clk),
-        .rclk(rd_clk),
-        .rst(rst),
+        .wr_clk(wr_clk),
+        .rd_clk(rd_clk),
+        .wr_rst_n(rst_n),
+        .rd_rst_n(rst_n),
         .wr_en(wr_en),
         .rd_en(rd_en),
         .wr_data(wr_data),
@@ -86,7 +87,7 @@ module tb_async_fifo_ram;
     end
 
     initial begin
-        rst             = 1'b1;
+        rst_n           = 1'b0;
         wr_en           = 1'b0;
         rd_en           = 1'b0;
         wr_data         = {DW{1'b0}};
@@ -100,7 +101,7 @@ module tb_async_fifo_ram;
 
         repeat (4) @(posedge wr_clk);
         repeat (4) @(posedge rd_clk);
-        rst = 1'b0;
+        rst_n = 1'b1;
 
         // Phase 1: fill FIFO to full.
         while (wr_accept_count < DEPTH) begin
@@ -162,7 +163,7 @@ module tb_async_fifo_ram;
         if (model_ridx != model_widx) fail("Not all written words were read");
         if (!empty) fail("FIFO should be empty at end of test");
 
-        $display("TEST PASSED: async_fifo_with_ram + async_fifo_dp_ram");
+        $display("TEST PASSED: async_fifo (internal memory)");
         $finish;
     end
 
