@@ -222,10 +222,65 @@ end
 ```
 
 ### Meaning
-Sequential ownership of write-side state.
+This block is the **single source of truth** for write-domain pointer state.
+- `wr_ptr_bin` is the committed write pointer in binary (used for arithmetic + memory index).
+- `wr_ptr_gray` is the committed write pointer in Gray code (used for CDC export to read side).
 
-### Why reset both encodings
-Binary and Gray represent same state in different coordinates. If reset inconsistently, flags can be wrong until re-aligned.
+Combinational logic (`wr_ptr_*_next`) decides what should happen this cycle; this sequential block is where that decision becomes architecturally real on the clock edge.
+
+### Why these assignments exist at all
+Without this register stage, pointers would be purely combinational and could glitch within a cycle. That would be dangerous because:
+- Memory write address must be stable at the active clock edge.
+- `full` logic depends on a coherent pointer value.
+- Cross-domain synchronization expects a clean, clocked Gray pointer, not a transient combinational value.
+
+So this block enforces the normal synchronous pattern:
+1. Compute next state combinationally.
+2. Commit next state synchronously.
+3. Use committed state as the official FIFO state.
+
+### Why assign `wr_ptr_bin <= wr_ptr_bin_next`
+`wr_ptr_bin` is the pointer that directly represents write progress in the local domain.
+- It must update only on `wr_clk` edges so write-side behavior is deterministic.
+- It must be held when write is not accepted (`!wr_en` or `full`) so no phantom advance occurs.
+- It must increment exactly once per accepted write so each write consumes one slot.
+
+In other words, this assignment preserves the FIFO invariant:
+`number_of_committed_writes` advances only when a real write handshake occurs.
+
+### Why assign `wr_ptr_gray <= wr_ptr_gray_next`
+`wr_ptr_gray` is not "extra"; it is the CDC-safe representation of the same pointer state.
+- The read domain never sees `wr_ptr_bin` directly.
+- The read domain's empty logic compares synchronized Gray pointers.
+- Therefore `wr_ptr_gray` must be updated in lockstep with `wr_ptr_bin` every cycle.
+
+If Gray were derived later from an already-synchronized binary pointer, CDC safety would be broken (multi-bit async sampling risk). The design is correct because conversion is done in write domain first, then Gray crosses domains.
+
+### Why reset sets both to all zeros
+```verilog
+wr_ptr_bin  <= {(ADDR_WIDTH+1){1'b0}};
+wr_ptr_gray <= {(ADDR_WIDTH+1){1'b0}};
+```
+Reset must establish a mathematically consistent state:
+- Binary zero corresponds to Gray zero.
+- Both domains start from known equal pointers.
+- Equal pointers represent empty FIFO after synchronization latency.
+
+If only one encoding were reset or values differed, the two domains could temporarily disagree on occupancy and generate false `full`/`empty`.
+
+### Why the reset is asynchronous (`or negedge wr_rst_n`)
+The write domain must be forceable to a safe pointer state even if `wr_clk` is not currently toggling.
+That helps guarantee deterministic startup/bring-up and avoids relying on "wait for first clock" behavior to clear stale state.
+
+### Why non-blocking assignments (`<=`) are mandatory here
+These are state registers, so non-blocking updates ensure all sequential signals sample old values and update together at the edge.
+That avoids simulation race behavior and matches real flip-flop hardware semantics.
+
+### Practical consequence
+This block gives you a robust contract:
+- Before edge: `wr_ptr_*_next` expresses intent.
+- At edge: intent is committed.
+- After edge: committed pointer state is stable for memory write indexing, full detection pipeline, and CDC export.
 
 ---
 
