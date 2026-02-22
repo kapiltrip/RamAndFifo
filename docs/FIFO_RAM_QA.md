@@ -4,7 +4,7 @@ This page captures all your questions so far and the answers, in one place.
 
 ## Quick Links
 - Sync RAM: [`../rtl/sync/sync_ram.v`](../rtl/sync/sync_ram.v)
-- Sync FIFO: [`../rtl/sync/sync_fifo_ram.v`](../rtl/sync/sync_fifo_ram.v)
+- Sync FIFO: [`../rtl/sync/sync_fifo_ram.v`](../rtl/sync/sync_fifo_ram.v)a
 - Async RAM: [`../rtl/async/async_dp_ram.v`](../rtl/async/async_dp_ram.v)
 - Async FIFO: [`../rtl/async/async_fifo_ram.v`](../rtl/async/async_fifo_ram.v)
 - Sync TB: [`../tb/sync/tb_sync_fifo_ram.v`](../tb/sync/tb_sync_fifo_ram.v)
@@ -198,3 +198,25 @@ Updated async FIFO to match that flow more directly:
   - `full_next  = ((wbin_next - wq2_rbin) == FIFO_DEPTH)`
 
 Result remained correct; async and sync testbenches both passed.
+
+## 24) "is this async FIFO optimal? if yes update existing, if not make it"
+**Answer:**  
+Improved the existing async FIFO to a simpler standard form:
+- Removed extra Gray-to-binary conversion path
+- Kept binary pointers for address progression
+- Used direct Gray-code comparisons for flags:
+  - `empty_next = (rgray_next == rq2_wgray)`
+  - `full_next  = (wgray_next == {~wq2_rgray[ADDR_WIDTH:ADDR_WIDTH-1], wq2_rgray[ADDR_WIDTH-2:0]})`
+
+This is cleaner and commonly used in production async FIFO implementations.  
+Both async and sync testbenches passed after the update.
+
+## 25) "remove RAM integration from async FIFO"
+**Answer:**  
+Updated async FIFO to use internal memory array instead of external RAM instantiation:
+- Removed `async_fifo_dp_ram` instance from `rtl/async/async_fifo_ram.v`
+- Added internal FIFO memory (`mem`) and internal read data register
+- Kept pointer/flag CDC logic unchanged
+
+This is a good choice for learning and smaller FIFOs.  
+For larger/deeper hardware FIFOs, external/inferred block RAM integration is still often preferred.
