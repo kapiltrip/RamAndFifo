@@ -6,6 +6,7 @@ This page answers the handwritten questions with respect to the active RAM and R
 - [`integration/ram_and_fifo/rtl/sync_fifo_ram.v`](integration/ram_and_fifo/rtl/sync_fifo_ram.v)
 - [`integration/ram_and_fifo/rtl/syncFifo.v`](integration/ram_and_fifo/rtl/syncFifo.v)
 - [`integration/ram_and_fifo/tb/tb_sync_fifo_ram.v`](integration/ram_and_fifo/tb/tb_sync_fifo_ram.v)
+- [Migrated FIFO review and testing lessons](docs/SYNCHRONOUS_FIFO_REVIEW_AND_TESTING.md)
 
 ## Original handwritten questions
 
