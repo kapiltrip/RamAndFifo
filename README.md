@@ -1,80 +1,78 @@
 # RAM + FIFO Learning Workspace
 
-This repository is a learning-focused RTL workspace for synchronous and asynchronous FIFO design, RAM integration, and simulation.
+This repository is organized as a progressive Verilog learning workspace: start with the smallest build artifacts, verify RAM and FIFO independently, and then test the RAM-backed FIFO integration.
 
-## Repo Layout
+## Handwritten directory plan
 
-- repo root : active synchronous RAM and FIFO RTL
-- `tb/sync/` : active synchronous testbenches
-- `tb/archive/async/` : archived async testbenches kept for reference
-- `docs/` : Q&A notes, TODOs, and project notes
-- `docs/reference/` : PDFs and study material
-- `build/` : simulation build outputs
+![Handwritten RAM and FIFO repository directory plan](docs/images/repository-directory-structure.jpg)
 
-## Current FIFO Modules
+The implemented structure follows this plan: build artifacts stay under `minimal`, standalone blocks stay under `individual`, and the connected RAM/FIFO design keeps its RTL and testbenches together under `integration`.
 
-### Synchronous
+## Repository layout
 
-- Standard RAM-backed FIFO: `sync_fifo_ram.v`
-- Simpler user-style wrapper: `syncFifo.v`
-- Shared RAM block: `sync_ram.v`
-- Pure synchronous FIFO with internal memory: `sync_fifo.v`
+```text
+ramAndFifo/
+|-- minimal/
+|   `-- build/                         # Compiled simulation outputs
+|-- individual/
+|   |-- ram/                           # Standalone RAM RTL and testbench
+|   `-- fifo/                          # Standalone internal-memory FIFO RTL and testbench
+|-- integration/
+|   |-- RAM_FIFO_Test_Cases.xlsx       # Verification matrix and run summary
+|   `-- ram_and_fifo/
+|       |-- rtl/                       # RAM-backed FIFO RTL and wrapper
+|       `-- tb/                        # Integration testbenches
+|-- docs/                              # Notes and reference material
+`-- README.md
+```
 
-### Archived Reference Material
+`ram_and_fifo` uses an underscore instead of `ram&fifo` so the path is portable and does not require shell escaping.
 
-- Short sync Q&A: `docs/FIFO_QNA.md`
-- Long project Q&A: `docs/FIFO_RAM_QA.md`
-- Archived async benches: `tb/archive/async/`
+## Active files
 
-## Recommended Build Path (for the current repo)
+### Individual blocks
 
-1. Start with `sync_ram.v`.
-2. Then read `sync_fifo_ram.v`.
-3. If you want the same simpler naming style, use `syncFifo.v`.
-4. Run the synchronous testbench first.
-5. Use the archived async testbenches only as old reference material.
+- RAM: `individual/ram/sync_ram.v`
+- RAM practice draft: `individual/ram/practice.v`
+- RAM testbench: `individual/ram/tb_sync_ram.v`
+- FIFO with internal memory: `individual/fifo/sync_fifo.v`
+- FIFO testbench: `individual/fifo/tb_sync_fifo.v`
 
-## What You Can Build Next (Practical Applications)
+### RAM + FIFO integration
 
-If you want to build something now, these are good project targets:
+- RAM-backed FIFO: `integration/ram_and_fifo/rtl/sync_fifo_ram.v`
+- Simpler naming wrapper: `integration/ram_and_fifo/rtl/syncFifo.v`
+- Primary integration testbench: `integration/ram_and_fifo/tb/tb_sync_fifo_ram.v`
+- Wrapper testbench: `integration/ram_and_fifo/tb/tb_syncFifo.v`
+- Historical asynchronous benches: `integration/ram_and_fifo/tb/archive/async/`
+- Preserved earlier integration bench: `integration/ram_and_fifo/tb/archive/sync/tb_sync_fifo_ram_legacy.v`
+- Preserved malformed draft, excluded from builds: `integration/ram_and_fifo/rtl/archive/sync_fifo_ram_draft.v`
 
-1. UART clock-domain bridge
-- Producer: bytes from one clock domain.
-- Consumer: UART TX domain.
-- Async FIFO decouples bursty producer from serial output rate.
+## Recommended learning path
 
-2. Sensor-to-processor stream buffer
-- Producer: ADC/sensor sampling clock.
-- Consumer: CPU/system clock.
-- Async FIFO prevents data loss during burst reads.
+1. Read and simulate `individual/ram/sync_ram.v`.
+2. Read and simulate `individual/fifo/sync_fifo.v`.
+3. Study how `integration/ram_and_fifo/rtl/sync_fifo_ram.v` instantiates the standalone RAM.
+4. Run the integrated testbench and compare the results with `integration/RAM_FIFO_Test_Cases.xlsx`.
 
-3. AXI-Stream clock converter (mini version)
-- Wrap your FIFO with `valid/ready` handshake.
-- This is directly useful in FPGA data pipelines.
+## Useful commands
 
-4. Audio pipeline bridge
-- Producer: I2S sample clock domain.
-- Consumer: DSP/system domain.
-- Async FIFO smooths rate mismatch and jitter effects.
-
-## Useful Commands
+Run these commands from the repository root.
 
 ```powershell
-# check the sync RAM-based FIFO and the simpler wrapper
-iverilog -t null sync_ram.v sync_fifo_ram.v syncFifo.v
+# Standalone RAM
+iverilog -Wall -g2012 -s tb_sync_ram -o minimal/build/simv_ram_basic individual/ram/tb_sync_ram.v individual/ram/sync_ram.v
+vvp minimal/build/simv_ram_basic
 
-# check the pure sync FIFO with internal memory
-iverilog -t null sync_fifo.v
+# Standalone FIFO
+iverilog -Wall -g2012 -s tb_sync_fifo -o minimal/build/simv_fifo_basic individual/fifo/tb_sync_fifo.v individual/fifo/sync_fifo.v
+vvp minimal/build/simv_fifo_basic
 
-# run the sync RAM FIFO testbench
-iverilog -g2005-sv -o build/simv_sync tb/sync/tb_sync_fifo_ram.v sync_fifo_ram.v sync_ram.v
-vvp build/simv_sync
+# RAM-backed FIFO integration
+iverilog -Wall -g2012 -s tb_sync_fifo_ram -o minimal/build/simv_sync integration/ram_and_fifo/tb/tb_sync_fifo_ram.v integration/ram_and_fifo/rtl/sync_fifo_ram.v individual/ram/sync_ram.v
+vvp minimal/build/simv_sync
 
-# run the simpler naming-style sync wrapper testbench
-iverilog -g2005-sv -o build/simv_sync_style tb/sync/tb_syncFifo.v syncFifo.v sync_fifo_ram.v sync_ram.v
-vvp build/simv_sync_style
-
-# run the pure sync FIFO testbench
-iverilog -g2005-sv -o build/simv_sync_internal tb/sync/tb_sync_fifo.v sync_fifo.v
-vvp build/simv_sync_internal
+# Simpler wrapper
+iverilog -Wall -g2012 -s tb_syncFifo -o minimal/build/simv_sync_style integration/ram_and_fifo/tb/tb_syncFifo.v integration/ram_and_fifo/rtl/syncFifo.v integration/ram_and_fifo/rtl/sync_fifo_ram.v individual/ram/sync_ram.v
+vvp minimal/build/simv_sync_style
 ```

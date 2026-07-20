@@ -10,9 +10,9 @@ Use this page as:
 
 ## Active implementation referenced here
 
-- [Synchronous RAM](../sync_ram.v)
-- [RAM-backed FIFO](../sync_fifo_ram.v)
-- [RAM-backed FIFO testbench](../tb/sync/tb_sync_fifo_ram.v)
+- [Synchronous RAM](../individual/ram/sync_ram.v)
+- [RAM-backed FIFO](../integration/ram_and_fifo/rtl/sync_fifo_ram.v)
+- [RAM-backed FIFO testbench](../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v)
 - [RAM questions and answers](../RAM_QNA.md)
 
 ## Important behavior difference

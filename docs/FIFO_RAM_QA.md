@@ -2,26 +2,27 @@
 
 This page captures all your questions so far and the answers, in one place.
 
-Note: the active tree is now sync-focused. Older async references below are historical notes, and the remaining async testbenches live under `../tb/archive/async/`.
+Note: the active tree is now sync-focused. Older async references below are historical notes, and the remaining async testbenches live under `../integration/ram_and_fifo/tb/archive/async/`.
 
 ## Quick Links
-- Sync RAM: [`../sync_ram.v`](../sync_ram.v)
-- Sync FIFO: [`../sync_fifo_ram.v`](../sync_fifo_ram.v)
-- Sync FIFO Wrapper: [`../syncFifo.v`](../syncFifo.v)
-- Pure Sync FIFO: [`../sync_fifo.v`](../sync_fifo.v)
-- Sync TB: [`../tb/sync/tb_sync_fifo_ram.v`](../tb/sync/tb_sync_fifo_ram.v)
-- Sync Wrapper TB: [`../tb/sync/tb_syncFifo.v`](../tb/sync/tb_syncFifo.v)
-- Pure Sync FIFO TB: [`../tb/sync/tb_sync_fifo.v`](../tb/sync/tb_sync_fifo.v)
-- Archived Async TB: [`../tb/archive/async/tb_async_fifo_ram.v`](../tb/archive/async/tb_async_fifo_ram.v)
+- Sync RAM: [`../individual/ram/sync_ram.v`](../individual/ram/sync_ram.v)
+- Sync FIFO: [`../integration/ram_and_fifo/rtl/sync_fifo_ram.v`](../integration/ram_and_fifo/rtl/sync_fifo_ram.v)
+- Sync FIFO Wrapper: [`../integration/ram_and_fifo/rtl/syncFifo.v`](../integration/ram_and_fifo/rtl/syncFifo.v)
+- Pure Sync FIFO: [`../individual/fifo/sync_fifo.v`](../individual/fifo/sync_fifo.v)
+- Sync RAM TB: [`../individual/ram/tb_sync_ram.v`](../individual/ram/tb_sync_ram.v)
+- Sync FIFO TB: [`../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v`](../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v)
+- Sync Wrapper TB: [`../integration/ram_and_fifo/tb/tb_syncFifo.v`](../integration/ram_and_fifo/tb/tb_syncFifo.v)
+- Pure Sync FIFO TB: [`../individual/fifo/tb_sync_fifo.v`](../individual/fifo/tb_sync_fifo.v)
+- Archived Async TB: [`../integration/ram_and_fifo/tb/archive/async/tb_async_fifo_ram.v`](../integration/ram_and_fifo/tb/archive/async/tb_async_fifo_ram.v)
 - Short Q&A: [`FIFO_QNA.md`](FIFO_QNA.md)
 - TODO: [`TODO.md`](TODO.md)
 
 ## 1) "i need some standard code, for ram and fifo ... integrate it for me"
 **Answer:**  
 Integrated a standard synchronous FIFO using an instantiated synchronous RAM:
-- [`../sync_ram.v`](../sync_ram.v) (RAM block)
-- [`../sync_fifo_ram.v`](../sync_fifo_ram.v) (FIFO controller using RAM)
-- [`tb/sync/tb_sync_fifo_ram.v`](../tb/sync/tb_sync_fifo_ram.v) (testbench)
+- [`../individual/ram/sync_ram.v`](../individual/ram/sync_ram.v) (RAM block)
+- [`../integration/ram_and_fifo/rtl/sync_fifo_ram.v`](../integration/ram_and_fifo/rtl/sync_fifo_ram.v) (FIFO controller using RAM)
+- [`../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v`](../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v) (testbench)
 
 The design was validated with simulation and passed.
 
@@ -44,18 +45,18 @@ Start in this order:
 ## 4) "if i wanna learn this all, how and where from start the code"
 **Answer:**  
 Recommended learning path:
-1. [`../sync_ram.v`](../sync_ram.v) first (RAM behavior and timing).
-2. FIFO interface in [`../sync_fifo_ram.v`](../sync_fifo_ram.v).
+1. [`../individual/ram/sync_ram.v`](../individual/ram/sync_ram.v) first (RAM behavior and timing).
+2. FIFO interface in [`../integration/ram_and_fifo/rtl/sync_fifo_ram.v`](../integration/ram_and_fifo/rtl/sync_fifo_ram.v).
 3. Handshake logic (`do_write`, `do_read`).
 4. Count/flags logic (`fifo_count`, `full`, `empty`).
 5. Pointer movement and wrap behavior.
-6. Testbench flow in [`tb/sync/tb_sync_fifo_ram.v`](../tb/sync/tb_sync_fifo_ram.v).
+6. Testbench flow in [`../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v`](../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v).
 
 ## 5) "cant i open these in vivado"
 **Answer:**  
 Yes, you can use them in Vivado:
-- Add [`../sync_ram.v`](../sync_ram.v) and [`../sync_fifo_ram.v`](../sync_fifo_ram.v) as design sources.
-- Add [`tb/sync/tb_sync_fifo_ram.v`](../tb/sync/tb_sync_fifo_ram.v) as simulation source.
+- Add [`../individual/ram/sync_ram.v`](../individual/ram/sync_ram.v) and [`../integration/ram_and_fifo/rtl/sync_fifo_ram.v`](../integration/ram_and_fifo/rtl/sync_fifo_ram.v) as design sources.
+- Add [`../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v`](../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v) as simulation source.
 - Do not add `simv` (it is an Icarus simulation executable, not RTL source).
 
 ## 6) "how to select top modules?"
@@ -95,7 +96,7 @@ This file is that saved reference page.
 
 ## 12) "in ram, there is an en signal and i only give it do_write, why not do_read?"
 **Answer:**  
-In the current [`../sync_ram.v`](../sync_ram.v), there is no explicit read-enable port (`re`/`en` for read).  
+In the current [`../individual/ram/sync_ram.v`](../individual/ram/sync_ram.v), there is no explicit read-enable port (`re`/`en` for read).
 Read path is always active on clock (`dout <= mem[raddr]`), so only write side needs `we = do_write`.  
 `do_read` is used in FIFO controller to advance `rd_ptr`.
 
@@ -121,8 +122,8 @@ Q&A page updated to include all recent questions so your learning context stays 
 ## 16) "if anything is a wire, write it explicitly"
 **Answer:**  
 Updated module port declarations to explicitly mark wire-type ports:
-- [`../sync_fifo_ram.v`](../sync_fifo_ram.v): `input wire ...`, `output wire ...`
-- [`../sync_ram.v`](../sync_ram.v): `input wire ...`
+- [`../integration/ram_and_fifo/rtl/sync_fifo_ram.v`](../integration/ram_and_fifo/rtl/sync_fifo_ram.v): `input wire ...`, `output wire ...`
+- [`../individual/ram/sync_ram.v`](../individual/ram/sync_ram.v): `input wire ...`
 
 Functionality was re-verified with simulation after this style update.
 
@@ -131,11 +132,11 @@ Functionality was re-verified with simulation after this style update.
 Historically, the repo also had a working asynchronous FIFO example:
 - `rtl/async/async_dp_ram.v`: dual-clock RAM (`wr_clk` and `rd_clk`)
 - `rtl/async/async_fifo_ram.v`: async FIFO using Gray-code pointers + 2-flop pointer synchronizers
-- [`tb/archive/async/tb_async_fifo_ram.v`](../tb/archive/async/tb_async_fifo_ram.v): archived testbench with different write/read clock rates and data-order checks
+- [`../integration/ram_and_fifo/tb/archive/async/tb_async_fifo_ram.v`](../integration/ram_and_fifo/tb/archive/async/tb_async_fifo_ram.v): archived testbench with different write/read clock rates and data-order checks
 
 Simulation command:
 Historical command from the old async tree:
-`iverilog -g2005-sv -o build/simv_async tb/archive/async/tb_async_fifo_ram.v <old async RTL files>`
+`iverilog -g2005-sv -o minimal/build/simv_async integration/ram_and_fifo/tb/archive/async/tb_async_fifo_ram.v <old async RTL files>`
 
 Result: test passed.
 
@@ -164,12 +165,13 @@ Final integrated modules:
 ## 20) "make separate directories so files are easy to see"
 **Answer:**  
 Project was reorganized into folders:
-- repo root for synchronous design RTL
-- `tb/sync` for active testbenches
-- `tb/archive/async` for historical async testbenches
+- `individual/ram/` and `individual/fifo/` for standalone RTL and testbenches
+- `integration/ram_and_fifo/rtl/` for the connected RAM/FIFO RTL
+- `integration/ram_and_fifo/tb/` for active integration testbenches
+- `integration/ram_and_fifo/tb/archive/async/` for historical async testbenches
 - `docs` for notes and TODOs
 - `docs/reference` for external study material
-- `build` for simulation outputs
+- `minimal/build/` for simulation outputs and generated verification previews
 
 The active sync simulations were rerun after the cleanup and passed.
 

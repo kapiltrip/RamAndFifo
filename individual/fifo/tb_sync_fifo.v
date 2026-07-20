@@ -40,17 +40,18 @@ module tb_sync_fifo;
     task fail;
         input [1023:0] message;
         begin
-            $display("TEST FAILED: %0s", message);
-            $finish(1);
+            $fatal(1, "FIFO UNIT FAIL: %0s", message);
         end
     endtask
 
     initial begin
+        $timeformat(-9, 0, " ns", 8);
         rst     = 1'b1;
         wr_en   = 1'b0;
         rd_en   = 1'b0;
         wr_data = {DW{1'b0}};
 
+        $display("TC-FIFO-01: reset flags");
         repeat (2) @(posedge clk);
         rst = 1'b0;
 
@@ -59,12 +60,14 @@ module tb_sync_fifo;
         if (!empty) fail("FIFO should be empty after reset");
         if (full)   fail("FIFO should not be full after reset");
 
+        $display("TC-FIFO-02: fill to full");
         for (i = 0; i < DEPTH; i = i + 1) begin
             @(negedge clk);
             wr_en   <= 1'b1;
             wr_data <= i[DW-1:0];
             @(posedge clk);
         end
+        $display("TC-FIFO-03: block overflow");
         @(negedge clk);
         wr_en <= 1'b0;
         #1;
@@ -80,6 +83,7 @@ module tb_sync_fifo;
         #1;
         if (!full) fail("FIFO should remain full after blocked overflow write");
 
+        $display("TC-FIFO-04: FIFO order and empty flag");
         for (i = 0; i < DEPTH; i = i + 1) begin
             @(negedge clk);
             rd_en <= 1'b1;
@@ -99,7 +103,16 @@ module tb_sync_fifo;
         if (!empty) fail("FIFO should be empty after DEPTH reads");
         if (full)   fail("FIFO should not be full after all reads");
 
-        $display("TEST PASSED: sync_fifo (internal memory)");
+        $display("TC-FIFO-05: block underflow");
+        @(negedge clk);
+        rd_en <= 1'b1;
+        @(posedge clk);
+        @(negedge clk);
+        rd_en <= 1'b0;
+        #1;
+        if (!empty) fail("FIFO should remain empty after underflow attempt");
+
+        $display("FIFO UNIT RESULT: PASS - 5 basic cases verified");
         $finish;
     end
 
