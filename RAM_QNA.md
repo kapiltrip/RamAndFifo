@@ -2,10 +2,10 @@
 
 This page answers the handwritten questions with respect to the active RAM and RAM-backed FIFO code in this repository:
 
-- [`individual/ram/sync_ram.v`](individual/ram/sync_ram.v)
-- [`integration/ram_and_fifo/rtl/sync_fifo_ram.v`](integration/ram_and_fifo/rtl/sync_fifo_ram.v)
-- [`integration/ram_and_fifo/rtl/syncFifo.v`](integration/ram_and_fifo/rtl/syncFifo.v)
-- [`integration/ram_and_fifo/tb/tb_sync_fifo_ram.v`](integration/ram_and_fifo/tb/tb_sync_fifo_ram.v)
+- [`sync_ram.v`](sync_ram.v)
+- [`sync_fifo_ram.v`](sync_fifo_ram.v)
+- [`syncFifo.v`](syncFifo.v)
+- [`tb/sync/tb_sync_fifo_ram.v`](tb/sync/tb_sync_fifo_ram.v)
 - [Migrated FIFO review and testing lessons](docs/SYNCHRONOUS_FIFO_REVIEW_AND_TESTING.md)
 
 ## Original handwritten questions
@@ -216,7 +216,7 @@ For new SystemVerilog code, prefer `logic`, `always_ff`, and `always_comb`. Addi
 
 ### 8. Fix the incomplete practice draft before simulating it
 
-[`individual/ram/practice.v`](individual/ram/practice.v) uses `mem[waddr]` and `mem[raddr]`, but it does not currently declare `mem`. The active [`individual/ram/sync_ram.v`](individual/ram/sync_ram.v) contains the required declaration:
+The local practice draft at `individual/ram/practice.v` uses `mem[waddr]` and `mem[raddr]`, but it does not currently declare `mem`. The published active [`sync_ram.v`](sync_ram.v) contains the required declaration:
 
 ```verilog
 reg [DW-1:0] mem [0:DEPTH-1];
