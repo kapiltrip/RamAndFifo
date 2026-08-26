@@ -13,6 +13,7 @@ Use this page as:
 - [Synchronous RAM](../individual/ram/sync_ram.v)
 - [RAM-backed FIFO](../integration/ram_and_fifo/rtl/sync_fifo_ram.v)
 - [RAM-backed FIFO testbench](../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v)
+- [Reusable functional-coverage integration](../integration/functional_coverage/README.md)
 - [RAM questions and answers](../RAM_QNA.md)
 
 ## Important behavior difference

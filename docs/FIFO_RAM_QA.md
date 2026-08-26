@@ -13,6 +13,7 @@ Note: the active tree is now sync-focused. Older async references below are hist
 - Sync FIFO TB: [`../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v`](../integration/ram_and_fifo/tb/tb_sync_fifo_ram.v)
 - Sync Wrapper TB: [`../integration/ram_and_fifo/tb/tb_syncFifo.v`](../integration/ram_and_fifo/tb/tb_syncFifo.v)
 - Pure Sync FIFO TB: [`../individual/fifo/tb_sync_fifo.v`](../individual/fifo/tb_sync_fifo.v)
+- Functional Coverage Integration: [`../integration/functional_coverage/README.md`](../integration/functional_coverage/README.md)
 - Archived Async TB: [`../integration/ram_and_fifo/tb/archive/async/tb_async_fifo_ram.v`](../integration/ram_and_fifo/tb/archive/async/tb_async_fifo_ram.v)
 - Short Q&A: [`FIFO_QNA.md`](FIFO_QNA.md)
 - TODO: [`TODO.md`](TODO.md)
@@ -228,3 +229,21 @@ Updated async FIFO to use internal memory array instead of external RAM instanti
 
 This is a good choice for learning and smaller FIFOs.  
 For larger/deeper hardware FIFOs, external/inferred block RAM integration is still often preferred.
+
+## 26) "put the FIFO functional coverage in RamAndFifo as a separate integration; the code is the same"
+**Answer:**
+Added one shared SystemVerilog coverage collector under
+[`integration/functional_coverage/`](../integration/functional_coverage/README.md)
+and attached it through two thin wrappers:
+
+- [`tb_internal_fifo_coverage.sv`](../integration/functional_coverage/tb_internal_fifo_coverage.sv) observes the standalone FIFO with its internal `mem` array.
+- [`tb_ram_backed_fifo_coverage.sv`](../integration/functional_coverage/tb_ram_backed_fifo_coverage.sv) observes the separate `sync_fifo_ram` + `sync_ram` integration.
+
+Both wrappers reuse their existing self-checking testbench instead of copying
+the RTL or stimulus. The shared
+[`fifo_functional_coverage.sv`](../integration/functional_coverage/fifo_functional_coverage.sv)
+keeps the V136 coverpoints and crosses in one place, so the same coverage code
+is applied to both storage implementations. The coverage README also records
+the elaboration-time meaning of `parameter`/`localparam`, the original 64.10%
+V136 result, the accepted-operation limitation, and separate Icarus smoke and
+Questa coverage commands.
