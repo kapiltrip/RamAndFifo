@@ -1,5 +1,14 @@
 # RAM + FIFO Learning Workspace
 
+## Verification plan and progress tracker
+
+- [Verification plan](VERIFICATION_PLAN.md): **644 test cases** with the actual RTL signal names, stimulus ideas, expected results and sampling time.
+- [Excel progress tracker](VERIFICATION_CASES.xlsx): filterable cases, status dropdowns, automatic Done/Pending colors, completion counts and fields for your run evidence.
+- [HDL source map](VERIFICATION_SOURCE_MAP.md): 695 files classified as RTL, benches, support, drafts or archives, with links to the reviewed revisions.
+
+This is the combined plan for 14 public HDL repositories, stored here at the outermost directory. Start with P0 cases. Green **Done** means executed and passed with evidence; all unexecuted cases start **Pending**, and missing implementations/contracts are **Blocked**. No new RTL or testbench code is included. The earlier project notes and trackers below retain their historical scope.
+
+
 This repository is organized as a progressive Verilog learning workspace: start with the smallest build artifacts, verify RAM and FIFO independently, then test the RAM-backed FIFO and its reusable SystemVerilog functional-coverage integration.
 
 ## Handwritten directory plan
@@ -90,3 +99,4 @@ vvp minimal/build/simv_sync_style
 The ordinary commands above remain compatible with Icarus Verilog. For real
 SystemVerilog covergroup collection, use the Questa commands and limitations
 documented in the [functional-coverage integration](integration/functional_coverage/README.md).
+
